@@ -156,7 +156,7 @@ AeroGear.DataManager.validAdapters = {};
 /**
     preferred adapters for the fallback strategy
 */
-AeroGear.DataManager.preferred = [ "IndexedDB", "WebSQL", "SessionLocal", "Memory" ];
+AeroGear.DataManager.preferred = [ "IndexedDB", "WebSQL", "SessionLocal", "Memory", "CouchDB" ];
 
 /**
     Method to determine and store what adapters are valid for this environment
