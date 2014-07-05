@@ -23,6 +23,7 @@
     @param {String} [settings.dataType="json"] - the data type of the recipient's response
     @param {String} [settings.accept="application/json"] - the media types which are acceptable for the recipient's response
     @param {String} [settings.contentType="application/json"] - the media type of the entity-body sent to the recipient
+    @param {Object} [settings.headers] - the HTTP request headers
     @param {Object} [settings.params] - contains query parameters to be added in URL in case of GET request or in request body in case of POST and application/x-www-form-urlencoded content type
     @param {Object} [settings.data] - the data to be sent to the recipient
     @returns {Object} An ES6 Promise
@@ -112,14 +113,29 @@ AeroGear.ajax = function( settings ) {
             reject( request );
             that._oncomplete( request, "error" );
         };
+        
+        // create callback arguments
+        this._createCallbackArgs = function( request, status ) {
+            var statusText = request.statusText || status,
+                dataOrError;
+
+            if ( responseType === 'json' ) {
+                try {
+                    dataOrError = JSON.parse( request.responseText );
+                } catch ( error ) {
+                    dataOrError = request.responseText;
+                }
+            }
+            return [ dataOrError, statusText, request ];
+        };
 
         this._oncomplete = function( request, status ) {
             if( settings[ status ] ) {
-                settings[ status ].apply( this, arguments );
+                settings[ status ].apply( this, that._createCallbackArgs( request, status ) );
             }
 
             if( settings.complete ) {
-                settings.complete.call( this, request, "complete" );
+                settings.complete.call( this, [ "complete", request ] );
             }
         };
 

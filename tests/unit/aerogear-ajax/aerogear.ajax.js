@@ -410,7 +410,6 @@
     });
 
     asyncTest( "POST - application/json with queryString parameters", function() {
-        // the queryString params should not be considered from aerogear.ajax since the request type is not GET
         this.server.respondWith( "POST", "/api", [ 200, { "Content-Type": "application/json" }, JSON.stringify({ key: "value" })]);
 
         this.settings.type = "POST";
@@ -420,7 +419,6 @@
     });
 
     asyncTest( "PUT - application/json with queryString parameters", function() {
-        // the queryString params should not be considered from aerogear.ajax since the request type is not GET
         this.server.respondWith( "PUT", "/api", [ 200, { "Content-Type": "application/json" }, JSON.stringify({ key: "value" })]);
 
         this.settings.type = "PUT";
@@ -430,7 +428,6 @@
     });
 
     asyncTest( "DELETE - application/json with queryString parameters", function() {
-        // the queryString params should not be considered from aerogear.ajax since the request type is not GET
         this.server.respondWith( "DELETE", "/api", [ 200, { "Content-Type": "application/json" }, JSON.stringify({})]);
 
         this.settings.type = "DELETE";
@@ -450,6 +447,70 @@
         this.server.respondWith( "GET", "/api?project=aerogear&library=aerogear-js&module%20%24=aerogear%20ajax", [ 200, { "Content-Type": "application/x-www-form-urlencoded" }, JSON.stringify({ key: "value" })]);
 
         AeroGear.ajax( this.settings );
+        this.server.respond();
+    });
+
+    module("AeroGear.ajax - Callbacks", {
+        setup: function () {
+            this.server = sinon.fakeServer.create();
+        },
+        teardown: function () {
+            this.server.restore();
+        }
+    });
+
+    asyncTest("AeroGear.ajax - Callbacks - Success", function () {
+        expect(4);
+
+        this.server.respondWith( "POST", "auth/login", [ 200, { "Content-Type": "application/json" }, JSON.stringify({ username: "bob", logged: true })]);
+
+        var values = {
+            username: "bob",
+            password: "123"
+        };
+
+        AeroGear.ajax({
+            contentType: "application/json",
+            dataType: "json",
+            url: 'auth/login',
+            type: 'POST',
+            success: function (data, statusText, agXHR) {
+                equal(statusText, "OK", "OK Code");
+                equal(data.username, "bob", "Login username is bob");
+                equal(data.logged, true, "Login logged is true");
+                ok(agXHR instanceof XMLHttpRequest, "agXHR is XMLHttpRequest instance");
+                start();
+            },
+            data: values
+        });
+
+        this.server.respond();
+    });
+
+    asyncTest("AeroGear.ajax - Callbacks - Failure", function () {
+        expect(3);
+
+        this.server.respondWith( "POST", "auth/login", [ 401, { "Content-Type": "application/json" }, JSON.stringify({ message: "User authentication failed" })]);
+
+        var values = {
+            username: "bob",
+            password: "123"
+        };
+
+        AeroGear.ajax({
+            contentType: "application/json",
+            dataType: "json",
+            url: 'auth/login',
+            type: 'POST',
+            error: function (data, statusText, agXHR) {
+                equal(statusText, "Unauthorized", "Unauthorized Code");
+                equal(data.message, "User authentication failed", "Enrollment Failure Message");
+                ok(agXHR instanceof XMLHttpRequest, "agXHR is XMLHttpRequest instance");
+                start();
+            },
+            data: values
+        });
+
         this.server.respond();
     });
 

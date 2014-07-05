@@ -186,7 +186,7 @@
         var client, settings, ret;
 
         settings = {
-            success: function( request ) {
+            success: function( data, statusText, request ) {
                 equal( request.status, 200, "should be a 200" );
                 start();
             }
@@ -212,7 +212,7 @@
         var client, settings, ret;
 
         settings = {
-            error: function( request ) {
+            error: function( error, statusText, request ) {
                 equal( request.status, 404, "should be a 404" );
                 start();
             }
@@ -319,7 +319,7 @@
             deviceToken = "12345";
 
         settings = {
-            success: function( request ) {
+            success: function( data, statusText, request ) {
                 equal( request.status, 204, "should be a 204" );
                 start();
             }
@@ -340,7 +340,7 @@
         var client, settings, ret;
 
         settings = {
-            error: function( request ) {
+            error: function( error, statusText, request ) {
                 equal( request.status, 404, "should be a 404" );
                 start();
             }
